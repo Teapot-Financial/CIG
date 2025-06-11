@@ -161,6 +161,69 @@
         .comparison-table tbody tr:hover {
             background-color: #F3F4F6; /* Hover effect */
         }
+
+        /* Game specific styles */
+        .game-option-button {
+            background-color: #E0E7FF; /* Light blue */
+            color: #4B5563; /* Darker gray */
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            border: 1px solid #BFDBFE;
+            text-align: center; /* Center text for game buttons */
+            cursor: pointer;
+        }
+        .game-option-button:hover {
+            background-color: #BFDBFE; /* Slightly darker blue on hover */
+            transform: translateY(-2px);
+        }
+        .game-option-button:active {
+            transform: translateY(0);
+        }
+        .game-option-button.selected {
+            background-color: #4B5563; /* Darker gray when selected */
+            color: #ffffff;
+            border-color: #1F2937;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem; /* text-sm */
+            color: #6B7280; /* gray-500 */
+            margin-top: 0.5rem;
+        }
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: #BFDBFE; /* Light blue track */
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .2s;
+        }
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4B5563; /* Darker gray thumb */
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4B5563;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body class="bg-stone-50 text-gray-800">
@@ -206,6 +269,9 @@
                     </li>
                     <li>
                         <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="glossary">Investment Glossary ✨</button>
+                    </li>
+                    <li>
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="investment-game">Investment Game 🎮</button>
                     </li>
                 </ul>
             </nav>
@@ -317,6 +383,21 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- NEW: Investment Game Section -->
+                <section id="investment-game" class="content-section">
+                    <div class="text-center mb-8 max-w-3xl mx-auto">
+                        <h2 class="text-3xl font-bold mb-2">Find Your Investment Match 🎮</h2>
+                        <p class="text-gray-600">Answer a few questions to get a personalized recommendation on where to start your investment journey!</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 max-w-xl mx-auto">
+                        <div id="game-stage">
+                            <!-- Content for start, quiz stages, results will be dynamically injected here -->
+                        </div>
+                    </div>
+                </section>
+                <!-- END NEW: Investment Game Section -->
+
             </main>
         </div>
     </div>
@@ -491,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             title: "Robo-Advisors (Hybrid Approach)",
             description: `
-                <p><strong>What it is:</strong> An online investment management service that uses algorithms to build and manage a diversified portfolio of low-cost ETFs tailored to your risk tolerance and goals. It offers professional management with minimal effort from you.</p>
+                <p><strong>What it is:</strong> An online investment management service that uses algorithms to build and manage a diversified portfolio of low-cost ETFs tailored to your risk tolerance and goals. You typically answer a questionnaire, and they recommend and manage a suitable portfolio.</p>
                 <p><strong>Examples of Services:</strong></p>
                 <ul class="list-disc list-inside ml-4">
                     <li>RBC InvestEase</li>
@@ -745,7 +826,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // --- Existing Data (Remains Unchanged) ---
     const considerationsData = [
-        { icon: '💳', title: 'Social Insurance Number (SIN)', text: 'A valid SIN is required to open any registered investment account in Canada.' },
+        { icon: ' ', title: 'Social Insurance Number (SIN)', text: 'A valid SIN is required to open any registered investment account in Canada.' },
         { icon: '⚖️', title: 'Risk Tolerance', text: 'Honestly assess your comfort with potential losses. This dictates your investment choices.' },
         { icon: '🗓️', title: 'Investment Horizon', text: 'When do you need the money? Long-term goals can handle more risk than short-term ones.' },
         { icon: '🧺', title: 'Diversification', text: "Don't put all your eggs in one basket. Spread investments across different assets and geographies." },
@@ -800,6 +881,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const acknowledgeButton = document.getElementById('acknowledge-disclaimer');
     const mainAppContent = document.getElementById('main-app-content');
 
+    // --- Investment Game Elements ---
+    const gameStage = document.getElementById('game-stage');
+    // We will dynamically create and select elements within gameStage
+
     // --- Initial Load Logic with Disclaimer ---
     // If acknowledged, hide disclaimer and show main content
     if (sessionStorage.getItem('disclaimerAcknowledged') === 'true') {
@@ -828,7 +913,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.innerHTML = `
             <h3 class="text-2xl font-bold text-indigo-700 mb-2">${account.title}</h3> <!-- Changed text color -->
             <p class="text-gray-600 mb-2">${account.fullName}</p>
-            <p class="text-gray-700 text-sm">${account.purpose}</p>
+            <p class="text-700 text-sm">${account.purpose}</p>
         `;
         card.addEventListener('click', () => showDetailsModal(account, 'account'));
         accountsGrid.appendChild(card);
@@ -1031,6 +1116,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 renderComparisonTable(); // Render the comparison table
+            }
+            // Initialize game if navigating to game tab
+            if (target === 'investment-game') {
+                renderGameStage('start');
             }
         });
     });
@@ -1290,6 +1379,324 @@ document.addEventListener('DOMContentLoaded', function() {
             explainButton.disabled = false; // Enable button
         }
     }
+
+    // --- Investment Game Logic ---
+    let userProfile = {};
+    const gameStages = [
+        'start',
+        'stage1_goals', // Primary Goal, First-Time Home Buyer
+        'stage2_risk_horizon', // Risk Tolerance, Time Horizon
+        'stage3_involvement', // Desired Management Level
+        'results'
+    ];
+    let currentStageIndex = 0;
+
+    function renderGameStage(stage) {
+        gameStage.innerHTML = ''; // Clear current content
+        let contentHTML = '';
+        let controlsHTML = '';
+
+        switch (stage) {
+            case 'start':
+                contentHTML = `
+                    <div class="text-center">
+                        <h3 class="text-2xl font-semibold mb-4">Ready to find your investment match?</h3>
+                        <p class="text-gray-700 mb-6">This quick quiz will help you understand which investment accounts and products might be best for you based on your goals, risk tolerance, and time horizon.</p>
+                        <button id="start-game-btn" class="bg-indigo-600 text-white py-3 px-8 rounded-lg shadow hover:bg-indigo-700 transition-colors">Start Game</button>
+                    </div>
+                `;
+                break;
+
+            case 'stage1_goals':
+                contentHTML = `
+                    <h3 class="text-xl font-semibold mb-6 text-gray-800">1. What's your primary investment goal?</h3>
+                    <div class="flex flex-col space-y-4 mb-8">
+                        <button class="game-option-button" data-goal="Home">Save for a down payment on my first home.</button>
+                        <button class="game-option-button" data-goal="Retirement">Save for retirement.</button>
+                        <button class="game-option-button" data-goal="Flexible">Build general savings/wealth for flexible use.</button>
+                        <button class="game-option-button" data-goal="Education">Save for a child's education.</button>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-6 text-gray-800">2. Are you a first-time home buyer in Canada?</h3>
+                    <p class="text-sm text-gray-600 mb-4">(You haven't lived in a qualifying home as your principal residence in the current calendar year or the preceding four calendar years)</p>
+                    <div class="flex space-x-4 justify-center">
+                        <button class="game-option-button w-1/2" data-homebuyer="true">Yes, I am.</button>
+                        <button class="game-option-button w-1/2" data-homebuyer="false">No, I am not.</button>
+                    </div>
+                `;
+                controlsHTML = `
+                    <div class="flex justify-end mt-8">
+                        <button id="next-stage-btn" class="bg-gray-700 text-white py-2 px-6 rounded-lg shadow hover:bg-gray-800" disabled>Next</button>
+                    </div>
+                `;
+                break;
+
+            case 'stage2_risk_horizon':
+                contentHTML = `
+                    <h3 class="text-xl font-semibold mb-6 text-gray-800">3. How comfortable are you with your investment's value going up and down (volatility)?</h3>
+                    <input type="range" id="risk-slider" min="1" max="10" value="${userProfile.riskTolerance || 5}" class="mb-2">
+                    <div class="slider-label">
+                        <span>Low Risk (1)</span>
+                        <span>High Risk (10)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-8 text-center" id="risk-value-display">Comfort Level: ${userProfile.riskTolerance || 5}</p>
+
+                    <h3 class="text-xl font-semibold mb-6 text-gray-800">4. When do you plan to use this money?</h3>
+                    <input type="range" id="horizon-slider" min="1" max="10" value="${userProfile.timeHorizon || 5}" class="mb-2">
+                    <div class="slider-label">
+                        <span>Short-Term (1-3 years)</span>
+                        <span>Long-Term (10+ years)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-8 text-center" id="horizon-value-display">Time Horizon: ${userProfile.timeHorizon || 5} years</p>
+                `;
+                 controlsHTML = `
+                    <div class="flex justify-between mt-8">
+                        <button id="prev-stage-btn" class="bg-gray-400 text-white py-2 px-6 rounded-lg shadow hover:bg-gray-500">Back</button>
+                        <button id="next-stage-btn" class="bg-gray-700 text-white py-2 px-6 rounded-lg shadow hover:bg-gray-800">Next</button>
+                    </div>
+                `;
+                break;
+
+            case 'stage3_involvement':
+                contentHTML = `
+                    <h3 class="text-xl font-semibold mb-6 text-gray-800">5. How much hands-on involvement do you want in managing your investments?</h3>
+                    <input type="range" id="involvement-slider" min="1" max="10" value="${userProfile.managementInvolvement || 5}" class="mb-2">
+                    <div class="slider-label">
+                        <span>Fully Managed (1)</span>
+                        <span>Full Control (10)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-8 text-center" id="involvement-value-display">Involvement: ${userProfile.managementInvolvement || 5}</p>
+                `;
+                controlsHTML = `
+                    <div class="flex justify-between mt-8">
+                        <button id="prev-stage-btn" class="bg-gray-400 text-white py-2 px-6 rounded-lg shadow hover:bg-gray-500">Back</button>
+                        <button id="finish-game-btn" class="bg-indigo-600 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-700">See My Recommendation</button>
+                    </div>
+                `;
+                break;
+
+            case 'results':
+                contentHTML = `
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-900">Your Personalized Investment Match!</h3>
+                        <div id="user-profile-summary" class="bg-gray-50 p-4 rounded-lg text-left mb-6">
+                            <h4 class="font-semibold text-lg text-gray-700 mb-2">Your Profile:</h4>
+                            <ul class="list-disc list-inside text-gray-600">
+                                <li>Primary Goal: <span id="summary-goal" class="font-medium"></span></li>
+                                <li>Risk Tolerance: <span id="summary-risk" class="font-medium"></span></li>
+                                <li>Time Horizon: <span id="summary-horizon" class="font-medium"></span></li>
+                                <li>First-Time Home Buyer: <span id="summary-homebuyer" class="font-medium"></span></li>
+                                <li>Management Involvement: <span id="summary-involvement" class="font-medium"></span></li>
+                            </ul>
+                        </div>
+                        <div id="game-recommendation" class="p-6 bg-blue-50 border border-blue-200 rounded-lg text-left text-blue-800">
+                            <h4 class="font-bold text-xl mb-3">Our Recommendation:</h4>
+                            <p id="recommendation-text"></p>
+                        </div>
+                        <button id="play-again-btn" class="mt-8 bg-gray-700 text-white py-2 px-6 rounded-lg shadow hover:bg-gray-800">Play Again</button>
+                    </div>
+                `;
+                break;
+        }
+
+        gameStage.innerHTML = contentHTML + controlsHTML;
+        attachGameEventListeners(stage);
+    }
+
+    function attachGameEventListeners(stage) {
+        if (stage === 'start') {
+            document.getElementById('start-game-btn').addEventListener('click', () => {
+                currentStageIndex = gameStages.indexOf('stage1_goals');
+                renderGameStage(gameStages[currentStageIndex]);
+            });
+        } else if (stage === 'stage1_goals') {
+            const goalButtons = gameStage.querySelectorAll('[data-goal]');
+            const homebuyerButtons = gameStage.querySelectorAll('[data-homebuyer]');
+            const nextBtn = document.getElementById('next-stage-btn');
+
+            const checkCompletion = () => {
+                const goalSelected = !!userProfile.goal;
+                const homebuyerSelected = userProfile.firstTimeHomeBuyer !== undefined;
+                nextBtn.disabled = !(goalSelected && homebuyerSelected);
+            };
+
+            goalButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    goalButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    userProfile.goal = button.dataset.goal;
+                    checkCompletion();
+                });
+            });
+
+            homebuyerButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    homebuyerButtons.forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    userProfile.firstTimeHomeBuyer = (button.dataset.homebuyer === 'true');
+                    checkCompletion();
+                });
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (!nextBtn.disabled) {
+                    currentStageIndex++;
+                    renderGameStage(gameStages[currentStageIndex]);
+                }
+            });
+            // Apply previously selected state if user goes back and forth
+            if (userProfile.goal) {
+                const selectedGoalBtn = gameStage.querySelector(`[data-goal="${userProfile.goal}"]`);
+                if (selectedGoalBtn) selectedGoalBtn.classList.add('selected');
+            }
+            if (userProfile.firstTimeHomeBuyer !== undefined) {
+                const selectedHomebuyerBtn = gameStage.querySelector(`[data-homebuyer="${userProfile.firstTimeHomeBuyer}"]`);
+                if (selectedHomebuyerBtn) selectedHomebuyerBtn.classList.add('selected');
+            }
+            checkCompletion(); // Initial check
+
+        } else if (stage === 'stage2_risk_horizon') {
+            const riskSlider = document.getElementById('risk-slider');
+            const horizonSlider = document.getElementById('horizon-slider');
+            const riskDisplay = document.getElementById('risk-value-display');
+            const horizonDisplay = document.getElementById('horizon-value-display');
+            const nextBtn = document.getElementById('next-stage-btn');
+            const prevBtn = document.getElementById('prev-stage-btn');
+
+            // Set initial values from userProfile or defaults
+            riskSlider.value = userProfile.riskTolerance || 5;
+            horizonSlider.value = userProfile.timeHorizon || 5;
+
+            // Update display on load
+            updateSliderDisplay(riskSlider, riskDisplay, 'Comfort Level: ');
+            updateSliderDisplay(horizonSlider, horizonDisplay, 'Time Horizon: ', ' years');
+
+            riskSlider.addEventListener('input', () => {
+                userProfile.riskTolerance = parseInt(riskSlider.value);
+                updateSliderDisplay(riskSlider, riskDisplay, 'Comfort Level: ');
+            });
+            horizonSlider.addEventListener('input', () => {
+                userProfile.timeHorizon = parseInt(horizonSlider.value);
+                updateSliderDisplay(horizonSlider, horizonDisplay, 'Time Horizon: ', ' years');
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentStageIndex++;
+                renderGameStage(gameStages[currentStageIndex]);
+            });
+            prevBtn.addEventListener('click', () => {
+                currentStageIndex--;
+                renderGameStage(gameStages[currentStageIndex]);
+            });
+
+            function updateSliderDisplay(slider, displayElement, prefix, suffix = '') {
+                displayElement.textContent = `${prefix}${slider.value}${suffix}`;
+            }
+
+        } else if (stage === 'stage3_involvement') {
+            const involvementSlider = document.getElementById('involvement-slider');
+            const involvementDisplay = document.getElementById('involvement-value-display');
+            const finishBtn = document.getElementById('finish-game-btn');
+            const prevBtn = document.getElementById('prev-stage-btn');
+
+            involvementSlider.value = userProfile.managementInvolvement || 5;
+            updateSliderDisplay(involvementSlider, involvementDisplay, 'Involvement: ');
+
+            involvementSlider.addEventListener('input', () => {
+                userProfile.managementInvolvement = parseInt(involvementSlider.value);
+                updateSliderDisplay(involvementSlider, involvementDisplay, 'Involvement: ');
+            });
+
+            finishBtn.addEventListener('click', () => {
+                currentStageIndex++;
+                renderGameStage(gameStages[currentStageIndex]);
+            });
+            prevBtn.addEventListener('click', () => {
+                currentStageIndex--;
+                renderGameStage(gameStages[currentStageIndex]);
+            });
+
+             function updateSliderDisplay(slider, displayElement, prefix, suffix = '') {
+                displayElement.textContent = `${prefix}${slider.value}${suffix}`;
+            }
+
+        } else if (stage === 'results') {
+            document.getElementById('play-again-btn').addEventListener('click', () => {
+                currentStageIndex = gameStages.indexOf('start');
+                renderGameStage(gameStages[currentStageIndex]);
+            });
+            calculateRecommendation();
+        }
+    }
+
+    function calculateRecommendation() {
+        // Re-select DOM elements within this function to ensure they are available after rendering
+        const summaryGoal = document.getElementById('summary-goal');
+        const summaryRisk = document.getElementById('summary-risk');
+        const summaryHorizon = document.getElementById('summary-horizon');
+        const summaryHomebuyer = document.getElementById('summary-homebuyer');
+        const summaryInvolvement = document.getElementById('summary-involvement');
+        const recommendationText = document.getElementById('recommendation-text');
+
+        let accountRec = "";
+        let productRec = "";
+        let managementRec = "";
+
+        // Determine Account Recommendation
+        if (userProfile.goal === "Home" && userProfile.firstTimeHomeBuyer) {
+            accountRec = "FHSA (First Home Savings Account)";
+        } else if (userProfile.goal === "Retirement" && userProfile.timeHorizon >= 8) { // Long-term retirement
+            accountRec = "RRSP (Registered Retirement Savings Plan)";
+        } else if (userProfile.goal === "Education") {
+            accountRec = "RESP (Registered Education Savings Plan)";
+        } else {
+            // Default to TFSA for flexible goals, shorter horizons, or if FHSA/RRSP not ideal
+            accountRec = "TFSA (Tax-Free Savings Account)";
+        }
+
+        // Determine Product Recommendation based on Risk Tolerance and Time Horizon
+        const riskLevel = userProfile.riskTolerance;
+        const timeYears = userProfile.timeHorizon;
+
+        if (riskLevel <= 3 && timeYears <= 3) { // Low risk, short term
+            productRec = "High-Interest Savings Accounts (HISAs) or Guaranteed Investment Certificates (GICs). These offer safety and predictability for short-term needs.";
+        } else if (riskLevel <= 3 && timeYears > 3) { // Low risk, medium/long term
+            productRec = "Conservative bond funds or balanced ETFs with a high bond allocation. While low risk, be mindful of inflation over longer periods.";
+        } else if (riskLevel >= 4 && riskLevel <= 7 && timeYears <= 7) { // Medium risk, medium term
+            productRec = "Balanced Exchange-Traded Funds (ETFs) or diversified mutual funds. These offer a good blend of growth and relative stability.";
+        } else if (riskLevel >= 4 && riskLevel <= 7 && timeYears > 7) { // Medium risk, long term
+            productRec = "Growth-oriented Balanced ETFs or diversified equity ETFs. You have time to recover from market fluctuations.";
+        } else if (riskLevel >= 8 && timeYears >= 8) { // High risk, long term
+            productRec = "Growth-focused Equity Exchange-Treded Funds (ETFs) or a diversified portfolio of individual stocks. Be prepared for significant volatility for higher potential returns.";
+        } else { // Catch-all for less common combinations, or if input is mixed
+            productRec = "A diversified mix of investment products. Consider starting with broadly diversified ETFs and adjust based on your comfort and goals.";
+        }
+
+        // Determine Management Style Recommendation
+        const involvementLevel = userProfile.managementInvolvement;
+        if (involvementLevel <= 3) { // Fully Managed
+            managementRec = "A Robo-Advisor (like RBC InvestEase) or a Full-Service Financial Advisor if you prefer human guidance and have complex financial needs. Robo-advisors are generally more cost-effective.";
+        } else if (involvementLevel >= 4 && involvementLevel <= 7) { // Some Learning
+            managementRec = "A Robo-Advisor (like RBC InvestEase). They provide professional management with automated features while you learn the ropes.";
+        } else { // Full Control / DIY
+            managementRec = "A Self-Directed (DIY) brokerage account (e.g., Questrade, RBC Direct Investing). This gives you full control, but requires active learning and management on your part.";
+        }
+
+        summaryGoal.textContent = userProfile.goal;
+        summaryRisk.textContent = `${userProfile.riskTolerance} (Scale of 1-10)`;
+        summaryHorizon.textContent = `${userProfile.timeHorizon} years`;
+        summaryHomebuyer.textContent = userProfile.firstTimeHomeBuyer ? 'Yes' : 'No';
+        summaryInvolvement.textContent = `${userProfile.managementInvolvement} (Scale of 1-10)`;
+
+        recommendationText.innerHTML = `
+            <p class="mb-2">For your primary goal, we recommend opening a **${accountRec}**.</p>
+            <p class="mb-2">Regarding the types of investments to put inside, we suggest: **${productRec}**</p>
+            <p>For managing your investments, we recommend considering: **${managementRec}**</p>
+            <p class="mt-4 text-sm text-gray-700">Remember, this is a general recommendation. Always do your own research and consider consulting with a qualified financial advisor to ensure your choices align with your specific circumstances and goals.</p>
+        `;
+    }
+
+    // Initial render of the game start screen
+    renderGameStage('start');
 });
 </script>
 
