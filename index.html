@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Canadian Investing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Subtle, Elegant, Modern (Refined) -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F9FAFB; /* Very light grey */
+            color: #374151; /* Dark slate gray */
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .tab-active {
+            border-bottom-color: #4B5563; /* Darker gray for active tab */
+            color: #4B5563;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            border-bottom-color: transparent;
+            color: #9CA3AF; /* Medium gray for inactive tab */
+        }
+        .account-card, .product-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            border-radius: 0.75rem; /* rounded-lg */
+            overflow: hidden; /* Ensures image and gradient stay within bounds */
+        }
+        .account-card:hover, .product-card:hover {
+            transform: translateY(-8px) scale(1.02); /* More pronounced lift and slight scale */
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.08), 0 6px 12px -3px rgba(0, 0, 0, 0.03); /* Softer shadow */
+        }
+        .account-card {
+            background: linear-gradient(to bottom right, #FFFFFF, #E0E7FF); /* Soft blue gradient for accounts */
+            border: 1px solid #BFDBFE; /* Lighter blue border */
+        }
+        .product-card {
+            background: linear-gradient(to bottom right, #FFFFFF, #EBF8FF); /* Soft blue gradient for products (aligned with accounts) */
+            border: 1px solid #BFDBFE; /* Lighter blue border (aligned with accounts) */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 800px;
+            max-height: 400px;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Modal specific styling */
+        .modal-content {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .modal-content.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">Your Guide to Investing in Canada</h1>
+            <p class="text-lg text-gray-600">An interactive resource for newcomers.</p>
+        </header>
+
+        <nav class="border-b border-gray-200 mb-8">
+            <ul class="flex flex-wrap -mb-px justify-center text-sm font-medium text-center">
+                <li class="mr-2">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-active" data-tab="accounts">Account Types</button>
+                </li>
+                <li class="mr-2">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="compare">Compare Accounts</button>
+                </li>
+                <li class="mr-2">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="how-to">How to Invest</button>
+                </li>
+                <li class="mr-2">
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="products-deep-dive">Investment Products Deep Dive</button>
+                </li>
+                <li>
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="considerations">Key Considerations</button>
+                </li>
+                 <li>
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="recommendation">My Recommendation</button>
+                </li>
+                <li>
+                    <button class="inline-block p-4 border-b-2 rounded-t-lg tab-inactive" data-tab="glossary">Investment Glossary ✨</button>
+                </li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="accounts" class="content-section active">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">Registered Accounts: The Tax-Advantaged Buckets</h2>
+                    <p class="text-gray-600">Canada offers special accounts with unique tax benefits to help you save for specific goals. Click on any account below to learn more about its purpose, how it works, and its key features.</p>
+                </div>
+                <div id="accounts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </section>
+
+            <section id="compare" class="content-section">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">Compare Accounts Side-by-Side</h2>
+                    <p class="text-gray-600">Choosing the right account can be tough. Use this section to directly compare the features of the three main personal savings accounts. Use the buttons below the chart to visually compare their key tax treatments.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-2 mt-6">
+                        <button class="chart-toggle-btn bg-gray-700 text-white py-2 px-4 rounded-lg shadow hover:bg-gray-800" data-type="contribution">Contribution Taxability</button>
+                        <button class="chart-toggle-btn bg-gray-400 text-white py-2 px-4 rounded-lg shadow hover:bg-gray-500" data-type="withdrawal">Withdrawal Taxability</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="how-to" class="content-section">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">How to Invest: Products & Management</h2>
+                    <p class="text-gray-600">Once you've chosen an account (the "bucket"), you need to decide what to put inside it (the "products") and who will manage it. Explore the options below to understand your choices.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div id="investment-products">
+                        <h3 class="text-2xl font-bold mb-4 text-center">Investment Products</h3>
+                    </div>
+                    <div id="management-styles">
+                         <h3 class="text-2xl font-bold mb-4 text-center">Management Styles</h3>
+                    </div>
+                </div>
+            </section>
+
+            <section id="products-deep-dive" class="content-section">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">Investment Products Deep Dive</h2>
+                    <p class="text-gray-600">Explore specific examples and typical performance for various investment products available in Canada. Remember, past performance is not an indicator of future results.</p>
+                </div>
+                <div id="detailed-products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                </div>
+            </section>
+            
+            <section id="considerations" class="content-section">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">Important Considerations for Newcomers</h2>
+                     <p class="text-gray-600">Before you start investing, keep these crucial points in mind. They will help you build a solid financial foundation and avoid common pitfalls.</p>
+                </div>
+                <div id="considerations-list" class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+                </div>
+            </section>
+            
+            <section id="recommendation" class="content-section">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">My Recommendation for a Newcomer</h2>
+                    <p class="text-gray-600">Based on the options, here is a suggested path for a newcomer to get started with investing in Canada. This approach prioritizes flexibility and long-term growth.</p>
+                </div>
+                 <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg border border-gray-100">
+                    <div id="recommendation-content"></div>
+                </div>
+            </section>
+
+            <section id="glossary" class="content-section">
+                <div class="text-center mb-8 max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">Investment Glossary ✨</h2>
+                    <p class="text-gray-600">Have a financial term you don't understand? Enter it below and let our AI-powered glossary provide a concise explanation for you!</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto border border-gray-100">
+                    <div class="flex items-center mb-4">
+                        <input type="text" id="glossary-input" placeholder="e.g., Diversification, Capital Gains" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        <button id="explain-btn" class="ml-4 bg-gray-700 text-white py-3 px-6 rounded-lg shadow hover:bg-gray-800 flex items-center justify-center">
+                            Explain Term
+                            <div id="loading-spinner" class="loading-spinner hidden"></div>
+                        </button>
+                    </div>
+                    <div id="glossary-output" class="p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[100px] text-gray-700">
+                        <p class="text-center text-gray-500">Your explanation will appear here.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Data Definitions (Updated with new 'detailedProductData' and images) ---
+    const accountData = {
+        rrsp: {
+            title: "RRSP",
+            fullName: "Registered Retirement Savings Plan",
+            purpose: "Primarily designed for long-term retirement savings.",
+            details: [
+                { title: "Contributions", text: "Tax-deductible, reducing your taxable income for the year." },
+                { title: "Growth", text: "Investments grow tax-deferred until withdrawal." },
+                { title: "Withdrawals", text: "Fully taxable as income when withdrawn, ideally at a lower tax rate in retirement." },
+                { title: "Maturity", text: "Must be converted to a RRIF or annuity by the end of the year you turn 71." }
+            ],
+            features: [
+                { title: "Home Buyer's Plan (HBP)", text: "Withdraw up to $35,000 tax-free for a first home, repayable over 15 years." },
+                { title: "Lifelong Learning Plan (LLP)", text: "Withdraw up to $20,000 tax-free for education, repayable over 10 years." }
+            ]
+        },
+        tfsa: {
+            title: "TFSA",
+            fullName: "Tax-Free Savings Account",
+            purpose: "A highly flexible account for almost any savings goal.",
+            details: [
+                { title: "Contributions", text: "Not tax-deductible. Made with after-tax money." },
+                { title: "Growth", text: "Investment income and capital gains are completely tax-free, for life." },
+                { title: "Withdrawals", text: "Completely tax-free, anytime, for any reason. Withdrawn amount is added back to contribution room the next year." },
+                { title: "Age Limit", text: "None. Can be held for your entire life." }
+            ],
+            features: [
+                { title: "Major Benefit", text: "The power of tax-free compounding is incredible for long-term growth." }
+            ]
+        },
+        fhsa: {
+            title: "FHSA",
+            fullName: "First Home Savings Account",
+            purpose: "A powerful account to save for a down payment on a first home.",
+            details: [
+                { title: "Contributions", text: "Tax-deductible, like an RRSP. Annual limit of $8,000, lifetime limit of $40,000." },
+                { title: "Growth", text: "Grows completely tax-free, like a TFSA." },
+                { title: "Withdrawals", text: "Completely tax-free when used for a qualifying first home purchase." },
+                { title: "Time Limit", text: "Must be used within 15 years of opening or by age 71. Unused funds can be transferred to an RRSP/RRIF." }
+            ],
+            features: [
+                 { title: "Best of Both Worlds", text: "Combines the tax deduction of an RRSP with the tax-free withdrawal of a TFSA for a home purchase." }
+            ]
+        },
+        resp: {
+            title: "RESP",
+            fullName: "Registered Education Savings Plan",
+            purpose: "To save for a child's post-secondary education.",
+            details: [
+                { title: "Contributions", text: "Not tax-deductible." },
+                { title: "Growth", text: "Grows tax-deferred." },
+                { title: "Government Grants", text: "The Canada Education Savings Grant (CESG) matches 20% of contributions up to $500 per year." },
+                { title: "Withdrawals", text: "Growth and grants are taxed in the hands of the student, who typically pays little to no tax." }
+            ],
+            features: []
+        },
+        rdsp: {
+            title: "RDSP",
+            fullName: "Registered Disability Savings Plan",
+            purpose: "To help individuals with disabilities save for the long term.",
+            details: [
+                { title: "Contributions", text: "Not tax-deductible." },
+                { title: "Growth", text: "Grows tax-sheltered." },
+                { title: "Government Grants", text: "Benefits from generous government grants and bonds." }
+            ],
+            features: []
+        },
+        nonRegistered: {
+            title: "Non-Registered",
+            fullName: "Non-Registered Account",
+            purpose: "For investing after you've maxed out registered accounts.",
+            details: [
+                { title: "Contributions", text: "No tax deduction and no contribution limits." },
+                { title: "Growth", text: "All investment income (interest, dividends, capital gains) is taxable in the year it is earned." },
+                { title: "Withdrawals", text: "No tax on withdrawal of principal, but realized capital gains are taxed." }
+            ],
+            features: []
+        }
+    };
+    
+    // Simplified product data for the "How to Invest" section accordions
+    const productData = [
+        {
+            title: "Cash / High-Interest Savings Accounts (HISAs)",
+            description: `
+                <p><strong>What they are:</strong> A very low-risk way to save money. Your funds are easily accessible, making them ideal for short-term needs like an emergency fund.</p>
+                <p><strong>Risk Level:</strong> Very Low</p>
+            `
+        },
+        {
+            title: "Guaranteed Investment Certificates (GICs)",
+            description: `
+                <p><strong>What they are:</strong> A low-risk investment where you lend money to a financial institution for a set period at a fixed interest rate. Your principal is guaranteed.</p>
+                <p><strong>Risk Level:</strong> Very Low</p>
+            `
+        },
+        {
+            title: "Mutual Funds",
+            description: `
+                <p><strong>What they are:</strong> A pool of money from many investors, managed by a professional fund manager, invested in a diversified portfolio of stocks, bonds, or other securities. They aim to outperform a specific benchmark.</p>
+                <p><strong>Risk Level:</strong> Varies (Low to High, depending on fund's holdings)</p>
+            `
+        },
+        {
+            title: "Exchange-Traded Funds (ETFs)",
+            description: `
+                <p><strong>What they are:</strong> Similar to mutual funds, but they trade like stocks on a stock exchange. Most ETFs are designed to track a specific index (e.g., S&P/TSX Composite Index) rather than actively manage a portfolio.</p>
+                <p><strong>Risk Level:</strong> Varies (Medium to High, depending on underlying assets)</p>
+            `
+        },
+        {
+            title: "Stocks (Equities)",
+            description: `
+                <p><strong>What they are:</strong> Represents ownership in a publicly traded company. When you buy a stock, you own a small piece of that company. Their value can increase (capital gains) and may pay dividends.</p>
+                <p><strong>Risk Level:</strong> High</p>
+            `
+        },
+        {
+            title: "Bonds",
+            description: `
+                <p><strong>What they are:</strong> Essentially, lending money to a government or corporation. In return, you receive regular interest payments, and your principal is returned at maturity. They are considered less risky than stocks.</p>
+                <p><strong>Risk Level:</strong> Low to Medium (depending on issuer and term)</p>
+            `
+        }
+    ];
+
+    // Management styles data remains the same
+    const managementData = [
+        {
+            title: "Self-Directed Investing (DIY)",
+            description: `
+                <p><strong>What it is:</strong> You take full control of your investments. You open an account with a discount brokerage and decide which stocks, ETFs, GICs, or mutual funds to buy and sell. This requires active management and research on your part.</p>
+                <p><strong>Examples of Platforms:</strong></p>
+                <ul class="list-disc list-inside ml-4">
+                    <li>RBC Direct Investing</li>
+                    <li>TD Direct Investing</li>
+                    <li>BMO InvestorLine</li>
+                    <li>Scotia iTRADE</li>
+                    <li>CIBC Investor's Edge</li>
+                    <li>Questrade</li>
+                </ul>
+                <p><strong>Fees:</strong> Typically the lowest fees, mainly trading commissions (which can be $0 for ETFs at many platforms) plus the fees of the underlying investments (e.g., ETF MERs). Account administration fees might apply if your balance is below a certain threshold.</p>
+                <p><strong>Best For:</strong> Investors who are knowledgeable, disciplined, and have the time and interest to actively manage their own portfolios.</p>
+            `
+        },
+        {
+            title: "Robo-Advisors (Hybrid Approach)",
+            description: `
+                <p><strong>What it is:</strong> An online investment management service that uses algorithms to build and manage a diversified portfolio of low-cost ETFs tailored to your risk tolerance and goals. It offers professional management with minimal effort from you.</p>
+                <p><strong>Examples of Services:</strong></p>
+                <ul class="list-disc list-inside ml-4">
+                    <li>RBC InvestEase</li>
+                    <li>Wealthsimple Invest</li>
+                    <li>Questwealth Portfolios (Questrade)</li>
+                    <li>BMO SmartFolio</li>
+                    <li>TD Automated Investing</li>
+                    <li>CI Direct Investing</li>
+                </ul>
+                <p><strong>Fees:</strong> Generally low. Management fees typically range from 0.25% to 0.50% of your assets annually. When including the fees of the underlying ETFs, the all-in cost is often between 0.5% and 0.8% per year. For example, RBC InvestEase has a management fee of 0.5%.</p>
+                <p><strong>Historical Returns:</strong> For a balanced portfolio, robo-advisors generally track broad market performance, minus their fees. For example, RBC InvestEase's balanced portfolio showed annualized returns of roughly 6-13% over various periods (1-5 years, as of late 2024), reflecting market movements.</p>
+                <p><strong>Best For:</strong> New investors, those who prefer a hands-off approach, or individuals who want diversified portfolios at a lower cost than traditional advisors.</p>
+            `
+        },
+        {
+            title: "Full-Service Financial Advisors",
+            description: `
+                <p><strong>What it is:</strong> You work with a human financial advisor who provides personalized financial planning, investment advice, and manages your portfolio. They offer comprehensive services, including retirement planning, tax strategies, and estate planning.</p>
+                <p><strong>Examples of Services:</strong></p>
+                <ul class="list-disc list-inside ml-4">
+                    <li>RBC Dominion Securities</li>
+                    <li>BMO Nesbitt Burns</li>
+                    <li>ScotiaMcLeod (Scotiabank)</li>
+                    <li>TD Wealth Private Client Group</li>
+                    <li>CI Assante Wealth Management</li>
+                    <li>IG Wealth Management</li>
+                </ul>
+                <p><strong>Fees:</strong> Generally the highest fees. Management fees can range from 1% to 2% or more of your assets under management annually, in addition to the fees of the underlying investment products (e.g., mutual fund MERs). These fees are for the comprehensive advice and hands-on management provided.</p>
+                <p><strong>Best For:</strong> Individuals with complex financial situations, those who prefer hands-on guidance, or who are uncomfortable making investment decisions themselves.</p>
+            `
+        }
+    ];
+
+    // NEW: Detailed Product Data with Images and Short Descriptions (Updated colors)
+    const detailedProductData = [
+        {
+            title: "High-Interest Savings Accounts (HISAs)",
+            shortDescription: "Very low-risk, highly liquid savings for short-term goals or emergency funds.",
+            image: "https://placehold.co/150x100/F0F4F8/4A5568?text=HISA", /* Light blue-gray background, dark gray text */
+            content: `
+                <p>HISAs offer a higher interest rate than traditional savings accounts, making them suitable for emergency funds or short-term savings goals. They are very low risk and liquid.</p>
+                <h4 class="font-semibold text-gray-800 mt-4 mb-2">Examples in Canada:</h4>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>EQ Bank Personal Account (often among the highest rates)</li>
+                    <li>Simplii Financial High Interest Savings Account</li>
+                    <li>Tangerine Savings Account</li>
+                    <li>BMO Savings Amplifier Account (often promotional rates)</li>
+                    <li>RBC High Interest eSavings Account (often promotional rates)</li>
+                    <li>Scotiabank MomentumPLUS Savings Account (often promotional rates)</li>
+                    <li>CIBC eAdvantage Savings Account (often promotional rates)</li>
+                    <li>Manulife Bank Advantage Account</li>
+                    <li>Oaken Financial Savings Account</li>
+                    <li>Neo Financial High-Interest Savings Account</li>
+                </ul>
+                <p class="mt-4"><strong>Typical Current Rates:</strong> 2% - 5% (often includes promotional bonuses for new money).
+                <p class="mt-2 text-sm text-gray-500"><em>Note: HISA rates fluctuate with the Bank of Canada's overnight rate. Historically, long-term rates have been much lower than current promotional rates.</em></p>
+            `
+        },
+        {
+            title: "Guaranteed Investment Certificates (GICs)",
+            shortDescription: "Fixed interest rate, principal guaranteed, for predictable returns.",
+            image: "https://placehold.co/150x100/F0F4F8/4A5568?text=GIC", /* Light blue-gray background, dark gray text */
+            content: `
+                <p>GICs are investments that guarantee your principal and offer a fixed rate of return over a set period. They are very low risk but less flexible than HISAs.</p>
+                <h4 class="font-semibold text-gray-800 mt-4 mb-2">Common Types and Examples:</h4>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>Non-Redeemable GICs:</strong> Most common. Cannot be cashed before maturity without penalty.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>RBC Non-Redeemable GICs (various terms)</li>
+                            <li>TD Fixed Rate GICs (various terms)</li>
+                            <li>EQ Bank GICs (competitive rates for various terms)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Cashable/Redeemable GICs:</strong> Can be cashed before maturity, usually after a waiting period (e.g., 30-90 days), but often offer a lower interest rate.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>BMO Cashable GIC</li>
+                            <li>Scotiabank Redeemable GIC</li>
+                        </ul>
+                    </li>
+                    <li><strong>Market-Linked GICs:</strong> Principal is guaranteed, but returns are tied to the performance of an underlying index (e.g., stock market). May have potential for higher returns but also a minimum guaranteed return of 0%.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>RBC Equity-Linked GICs</li>
+                            <li>TD Canadian Banks GIC</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="mt-4"><strong>Typical Current Rates (Non-Redeemable):</strong>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>1-Year GIC: 2.55% - 3.65%</li>
+                    <li>3-Year GIC: 2.65% - 3.70%</li>
+                    <li>5-Year GIC: 2.75% - 3.95%</li>
+                    <li>10-Year GIC: Around 3.25% - 3.35%</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-500"><em>Note: GIC rates vary by financial institution and term. Always compare offers.</em></p>
+            `
+        },
+        {
+            title: "Mutual Funds",
+            shortDescription: "Professionally managed diversified portfolios, but often with higher fees.",
+            image: "https://placehold.co/150x100/F0F4F8/4A5568?text=Mutual+Funds", /* Light blue-gray background, dark gray text */
+            content: `
+                <p>Mutual funds are professionally managed pools of money invested in various securities. They offer diversification and professional expertise but typically come with higher fees.</p>
+                <h4 class="font-semibold text-gray-800 mt-4 mb-2">Examples of Popular Categories/Funds in Canada:</h4>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>Canadian Equity Funds:</strong> Invest in Canadian stocks.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Mawer Canadian Equity Fund</li>
+                            <li>RBC Canadian Equity Fund</li>
+                            <li>TD Canadian Equity Fund</li>
+                        </ul>
+                    </li>
+                    <li><strong>Canadian Fixed Income/Bond Funds:</strong> Invest in Canadian bonds.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>CIBC Canadian Bond Fund</li>
+                            <li>RBC Bond Fund</li>
+                        </ul>
+                    </li>
+                    <li><strong>Balanced Funds:</strong> A mix of stocks and bonds, aiming for growth and income.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Mawer Balanced Fund</li>
+                            <li>RBC Select Balanced Portfolio</li>
+                            <li>TD Balanced Fund</li>
+                        </ul>
+                    </li>
+                    <li><strong>Global/International Equity Funds:</strong> Invest in stocks outside of Canada.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Mawer International Equity Fund</li>
+                            <li>RBC Global Equity Fund</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="mt-4"><strong>Typical Management Expense Ratios (MERs):</strong>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li>Actively Managed Canadian Equity Funds: Average ~2.45% annually</li>
+                    <li>Actively Managed Fixed Income Funds: Average ~1.62% annually</li>
+                    <li>Mawer Balanced Fund (lower end): ~0.91% annually</li>
+                </ul>
+                <p class="mt-4"><strong>Historical Performance:</strong> Varies greatly by fund and market conditions. Many actively managed mutual funds historically struggle to outperform their benchmarks after factoring in their higher fees over the long term. For example, a well-managed balanced fund might aim for annualized returns of 5-8% over the long term, but actual results can differ significantly.</p>
+                <p class="mt-2 text-sm text-gray-500"><em>Note: High MERs can significantly reduce your net returns over time.</em></p>
+            `
+        },
+        {
+            title: "Exchange-Traded Funds (ETFs)",
+            shortDescription: "Diversified baskets of investments that trade like stocks, with low fees.",
+            image: "https://placehold.co/150x100/F0F4F8/4A5568?text=ETFs", /* Light blue-gray background, dark gray text */
+            content: `
+                <p>ETFs are collections of investments that trade on stock exchanges, similar to individual stocks. Most ETFs are passively managed, meaning they aim to track a specific index, resulting in lower fees and broad diversification.</p>
+                <h4 class="font-semibold text-gray-800 mt-4 mb-2">Examples of Popular ETFs (Canadian-listed):</h4>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>Canadian Equity ETFs (tracking TSX Composite):</strong>
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Vanguard FTSE Canada Index ETF (VCE) - MER: 0.06%</li>
+                            <li>iShares Core S&P/TSX Capped Composite Index ETF (XIC) - MER: 0.06%</li>
+                            <li>BMO S&P/TSX Capped Composite Index ETF (ZCN) - MER: 0.06%</li>
+                        </ul>
+                    </li>
+                    <li><strong>US Equity ETFs (tracking S&P 500 - Canadian-listed, CAD or CAD-hedged):</strong>
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Vanguard S&P 500 Index ETF (VFV) - MER: 0.08% (CAD unhedged)</li>
+                            <li>iShares Core S&P 500 Index ETF (XUS) - MER: 0.10% (CAD unhedged)</li>
+                            <li>BMO S&P 500 Index ETF (ZSP) - MER: 0.09% (CAD unhedged)</li>
+                            <li>Vanguard S&P 500 Index ETF (CAD-hedged) (VSP) - MER: 0.08% (CAD hedged)</li>
+                        </ul>
+                    </li>
+                    <li><strong>US Total Market ETFs (Canadian-listed):</strong>
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Vanguard US Total Market Index ETF (VUN) - MER: 0.17% (CAD unhedged)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Canadian Bond ETFs:</strong>
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Vanguard Canadian Aggregate Bond Index ETF (VAB) - MER: 0.08%</li>
+                            <li>iShares Core Canadian Universe Bond Index ETF (XBB) - MER: 0.19%</li>
+                        </ul>
+                    </li>
+                    <li><strong>All-in-One Asset Allocation ETFs (convenient diversified portfolios):</strong>
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Vanguard All-Equity ETF Portfolio (VEQT) - MER: 0.24%</li>
+                            <li>Vanguard Balanced ETF Portfolio (VBAL) - MER: 0.24%</li>
+                            <li>iShares Core Growth ETF Portfolio (XGRO) - MER: 0.20%</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="mt-4"><strong>Typical Management Expense Ratios (MERs):</strong> Very low, generally 0.05% to 0.50% for broad market index ETFs.</p>
+                <p class="mt-4"><strong>Historical Performance:</strong>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>ETFs tracking TSX Composite Index (Canadian Equity):</strong> Historically averaged ~7-9% annualized returns over long periods. More recently, the TSX Composite had a YTD return of around 7.92% (as of June 10, 2025) and a 10-year annualized return of ~8.93% (as of June 9, 2025).</li>
+                    <li><strong>ETFs tracking S&P 500 Index (US Equity):</strong> Historically averaged >10% annualized returns over long periods. More recently, the S&P 500 had a 5-year CAGR of ~14.49% and a 10-year CAGR of ~10.17% (as of May 2025).</li>
+                    <li><strong>Bond ETFs (Canadian Aggregate):</strong> Returns are generally lower and more stable than equity ETFs.</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-500"><em>Note: Performance figures for specific ETFs will closely mirror their underlying index, minus the MER. Currency hedging affects returns.</em></p>
+            `
+        },
+        {
+            title: "Stocks (Equities)",
+            shortDescription: "Ownership in a company, offering high growth potential but also higher risk.",
+            image: "https://placehold.co/150x100/F0F4F8/4A5568?text=Stocks", /* Light blue-gray background, dark gray text */
+            content: `
+                <p>Investing in individual stocks means buying ownership in a specific company. This can offer high growth potential but also carries higher risk than diversified funds.</p>
+                <h4 class="font-semibold text-gray-800 mt-4 mb-2">Examples of Companies (across sectors, popular in Canada/US):</h4>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>Canadian Banks:</strong> Royal Bank of Canada (RY), Toronto-Dominion Bank (TD), Bank of Montreal (BMO), Bank of Nova Scotia (BNS) - generally stable, dividend-paying.</li>
+                    <li><strong>Canadian Energy:</strong> Enbridge Inc. (ENB), Canadian Natural Resources (CNQ), Suncor Energy (SU) - tied to commodity prices.</li>
+                    <li><strong>Canadian Tech/Growth:</strong> Shopify Inc. (SHOP), Constellation Software Inc. (CSU) - higher growth potential, often more volatile.</li>
+                    <li><strong>US Tech Giants:</strong> Apple Inc. (AAPL), Microsoft Corp. (MSFT), NVIDIA Corp. (NVDA), Amazon.com Inc. (AMZN), Meta Platforms Inc. (META) - dominant global companies, high growth, but also subject to market swings.</li>
+                    <li><strong>Canadian Utilities:</strong> Fortis Inc. (FTS), Hydro One Ltd. (H) - generally stable, regulated companies often paying dividends.</li>
+                </ul>
+                <p class="mt-4"><strong>Historical Performance (Market Benchmarks):</strong>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>S&P/TSX Composite Index (Canadian Stock Market):</strong> Has historically averaged annualized returns of approximately 7-9% over very long periods (e.g., 50+ years).</li>
+                    <li><strong>S&P 500 Index (U.S. Stock Market):</strong> Has historically delivered average annual returns of over 10% since 1957.</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-500"><em>Note: Individual stock performance can deviate significantly from market averages. Diversification across many stocks or investing in equity ETFs is generally recommended to mitigate individual company risk.</em></p>
+            `
+        },
+        {
+            title: "Bonds",
+            shortDescription: "Lending money to governments or corporations for regular interest payments.",
+            image: "https://placehold.co/150x100/F0F4F8/4A5568?text=Bonds", /* Light blue-gray background, dark gray text */
+            content: `
+                <p>Bonds represent a loan made by an investor to a borrower (typically a government or corporation). In return, the borrower pays regular interest payments and repays the principal at maturity. Bonds are generally considered less risky than stocks.</p>
+                <h4 class="font-semibold text-gray-800 mt-4 mb-2">Types and Examples:</h4>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>Government Bonds:</strong> Issued by federal, provincial, or municipal governments. Considered very low risk, especially federal bonds.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Government of Canada Bonds (e.g., 5-year, 10-year bonds)</li>
+                            <li>Provincial Government Bonds (e.g., Ontario Bonds)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Corporate Bonds:</strong> Issued by companies. Carry more risk than government bonds but typically offer higher interest rates.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Bonds from major Canadian corporations (e.g., Bell Canada, Enbridge)</li>
+                            <li>Investment-grade corporate bonds (higher credit rating, lower risk)</li>
+                            <li>High-yield (junk) bonds (lower credit rating, higher risk, higher potential return)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Real Return Bonds (RRBs):</strong> Government bonds whose principal and interest payments are adjusted for inflation.
+                        <ul class="list-circle list-inside ml-8">
+                            <li>Government of Canada Real Return Bonds</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p class="mt-4"><strong>Typical Yields / Historical Performance:</strong>
+                <ul class="list-disc list-inside ml-4 space-y-1">
+                    <li><strong>Canadian Government Bonds:</strong> Current yields on 5-year Government of Canada benchmark bonds are around 2.96% (as of June 6, 2025). Long-term historical returns have generally been in the 2-4% annualized range.</li>
+                    <li><strong>Canadian Corporate Bonds:</strong> Generally offer slightly higher yields than government bonds, often 0.5% - 1.5% higher depending on the issuer's credit quality and bond term. Funds tracking corporate bonds have seen returns like 1.31% YTD, 7.07% (2024), 8.16% (2023).</li>
+                </ul>
+                <p class="mt-2 text-sm text-gray-500"><em>Note: Bond prices move inversely to interest rates. When interest rates rise, existing bond prices typically fall, and vice versa.</em></p>
+            `
+        }
+    ];
+    
+    // --- Existing Data (Remains Unchanged) ---
+    const considerationsData = [
+        { icon: '💳', title: 'Social Insurance Number (SIN)', text: 'A valid SIN is required to open any registered investment account in Canada.' },
+        { icon: '⚖️', title: 'Risk Tolerance', text: 'Honestly assess your comfort with potential losses. This dictates your investment choices.' },
+        { icon: '🗓️', title: 'Investment Horizon', text: 'When do you need the money? Long-term goals can handle more risk than short-term ones.' },
+        { icon: '🧺', title: 'Diversification', text: "Don't put all your eggs in one basket. Spread investments across different assets and geographies." },
+        { icon: '💰', title: 'Fees', text: 'Be mindful of fees! Even small percentages significantly erode returns over time.' },
+        { icon: '📈', title: 'Compounding', text: 'Start early to let your returns earn returns, growing your wealth exponentially.' },
+        { icon: '📚', title: 'Financial Literacy', text: 'Continuously learn about investing. Knowledge is your best tool.' },
+        { icon: '🔥', title: 'Inflation', text: 'Investing helps your money grow faster than the rate of inflation, preserving your purchasing power.' },
+        { icon: '🆘', title: 'Emergency Fund', text: 'Before investing, secure 3-6 months of living expenses in an easily accessible savings account.' },
+        { icon: '🇨🇦', title: 'Tax Residency', text: 'Understand your status as a Canadian resident for tax purposes, as it affects your eligibility.' }
+    ];
+    
+    const recommendationData = `
+        <h3 class="text-xl font-bold mb-4">A Suggested Path to Get Started</h3>
+        <p class="mb-4">For most newcomers, the best approach is to prioritize flexibility and tax efficiency. Here’s a recommended order of operations:</p>
+        <ol class="list-decimal list-inside space-y-4">
+            <li>
+                <span class="font-semibold">Build an Emergency Fund:</span> Before anything else, save 3-6 months of living expenses in a High-Interest Savings Account (HISA).
+            </li>
+            <li>
+                <span class="font-semibold">Maximize your FHSA (if applicable):</span> If buying a home in Canada is a goal, the FHSA offers an unparalleled combination of a tax deduction on contributions and tax-free withdrawals for a home purchase. This should be your first priority.
+            </li>
+            <li>
+                <span class="font-semibold">Maximize your TFSA:</span> The tax-free growth and flexible, tax-free withdrawals make the TFSA an incredibly powerful and versatile tool for any goal. It's often wise to fill this before an RRSP, especially if you expect your income to rise in the future.
+            </li>
+            <li>
+                <span class="font-semibold">Contribute to your RRSP:</span> Once the TFSA/FHSA is maxed out, or if you are in a high tax bracket now, contributing to your RRSP is a great way to save for retirement and get a significant tax deduction.
+            </li>
+        </ol>
+        <h3 class="text-xl font-bold mt-6 mb-4">How to Start Investing?</h3>
+        <p>For the investment management style, starting with a <strong>Robo-Advisor like RBC InvestEase</strong> is highly recommended. It's simple, low-cost, and ensures your portfolio is professionally managed and diversified from day one, removing the guesswork and stress of doing it yourself.</p>
+    `;
+
+    // --- DOM Element Selection ---
+    const accountsGrid = document.getElementById('accounts-grid');
+    const productsContainer = document.getElementById('investment-products');
+    const managementContainer = document.getElementById('management-styles');
+    const detailedProductsList = document.getElementById('detailed-products-list'); // New container for cards
+    const considerationsList = document.getElementById('considerations-list');
+    const recommendationContent = document.getElementById('recommendation-content');
+
+    const tabs = document.querySelectorAll('[data-tab]');
+    const contentSections = document.querySelectorAll('.content-section');
+    const chartToggleButtons = document.querySelectorAll('.chart-toggle-btn');
+    const glossaryInput = document.getElementById('glossary-input');
+    const explainButton = document.getElementById('explain-btn');
+    const glossaryOutput = document.getElementById('glossary-output');
+    const loadingSpinner = document.getElementById('loading-spinner');
+
+    // --- Initial Rendering ---
+
+    // Render Account Type Cards
+    for (const key in accountData) {
+        const account = accountData[key];
+        const card = document.createElement('div');
+        card.className = 'account-card p-6 shadow-md'; /* Removed redundant border classes */
+        card.innerHTML = `
+            <h3 class="text-2xl font-bold text-indigo-700 mb-2">${account.title}</h3> <!-- Changed text color -->
+            <p class="text-gray-600 mb-2">${account.fullName}</p>
+            <p class="text-gray-700 text-sm">${account.purpose}</p>
+        `;
+        card.addEventListener('click', () => showDetailsModal(account, 'account'));
+        accountsGrid.appendChild(card);
+    }
+    
+    // Render Investment Product Accordions (in "How to Invest" tab)
+    productsContainer.innerHTML = `<h3 class="text-2xl font-bold mb-4 text-center">Investment Products</h3>`; // Reset to avoid duplicates
+    productData.forEach(item => {
+        const accordionItem = createAccordionItem(item.title, item.description);
+        productsContainer.appendChild(accordionItem);
+    });
+
+    // Render Management Style Accordions (in "How to Invest" tab)
+    managementContainer.innerHTML = `<h3 class="text-2xl font-bold mb-4 text-center">Management Styles</h3>`; // Reset to avoid duplicates
+    managementData.forEach(item => {
+        const accordionItem = createAccordionItem(item.title, item.description);
+        managementContainer.appendChild(accordionItem);
+    });
+
+    // NEW: Render Detailed Product Cards (in "Products Deep Dive" tab)
+    detailedProductData.forEach(item => {
+        const productCard = createProductCard(item);
+        detailedProductsList.appendChild(productCard);
+    });
+    
+    // Render Considerations List
+    considerationsData.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'bg-white p-4 rounded-lg shadow-md flex items-start border border-gray-100';
+        div.innerHTML = `
+            <span class="text-2xl mr-4 text-gray-600">${item.icon}</span> <!-- Changed icon color -->
+            <div>
+                <h4 class="font-bold text-lg text-gray-800">${item.title}</h4>
+                <p class="text-gray-600 text-sm">${item.text}</p>
+            </div>
+        `;
+        considerationsList.appendChild(div);
+    });
+    
+    // Set Recommendation Content
+    recommendationContent.innerHTML = recommendationData;
+
+    // --- Functions ---
+
+    // Function to create an accordion item (used in "How to Invest" tab)
+    function createAccordionItem(title, content) {
+        const div = document.createElement('div');
+        div.className = 'border-b border-gray-200';
+        div.innerHTML = `
+            <button class="w-full text-left py-4 px-2 focus:outline-none">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-lg text-gray-700">${title}</span> <!-- Changed text color -->
+                    <span class="transform transition-transform duration-300 text-gray-500">▼</span>
+                </div>
+            </button>
+            <div class="accordion-content px-2 pb-4 text-gray-600">
+                ${content}
+            </div>
+        `;
+        const button = div.querySelector('button');
+        const contentDiv = div.querySelector('.accordion-content');
+        const arrow = div.querySelector('span:last-child');
+        
+        button.addEventListener('click', () => {
+            if (contentDiv.style.maxHeight) {
+                contentDiv.style.maxHeight = null;
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                // Ensure all other accordions are closed
+                document.querySelectorAll('.accordion-content').forEach(otherContent => {
+                    if (otherContent !== contentDiv) {
+                        otherContent.style.maxHeight = null;
+                        otherContent.previousElementSibling.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+                    }
+                });
+                contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
+                arrow.style.transform = 'rotate(180deg)';
+            }
+        });
+        return div;
+    }
+
+    // NEW: Function to create a product card (used in "Products Deep Dive" tab)
+    function createProductCard(item) {
+        const card = document.createElement('div');
+        card.className = 'product-card p-6 shadow-md text-center flex flex-col items-center'; /* Removed redundant border classes */
+        card.innerHTML = `
+            <img src="${item.image}" alt="${item.title}" class="w-24 h-24 mb-4 rounded-full border-2 border-gray-300 shadow-md"> <!-- Changed border color -->
+            <h3 class="text-xl font-bold text-gray-700 mb-2">${item.title}</h3> <!-- Changed text color to align with main palette -->
+            <p class="text-gray-700 text-sm flex-grow">${item.shortDescription}</p>
+        `;
+        card.addEventListener('click', () => showDetailsModal(item, 'product'));
+        return card;
+    }
+
+    // Generalized function to show details in a modal
+    function showDetailsModal(data, type) {
+        const existingModal = document.getElementById('detail-modal');
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'detail-modal';
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+        
+        let modalContentHTML = '';
+        if (type === 'account') {
+            modalContentHTML = `
+                <h2 class="text-3xl font-bold text-indigo-700 mb-1">${data.title}</h2> <!-- Original text color for accounts -->
+                <p class="text-gray-500 text-lg mb-4">${data.fullName}</p>
+                <p class="text-lg text-gray-800 mb-6">${data.purpose}</p>
+                
+                <div class="space-y-4 mb-6">
+                    ${data.details.map(d => `
+                        <div>
+                            <h4 class="font-semibold text-gray-800">${d.title}</h4>
+                            <p class="text-gray-600">${d.text}</p>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${data.features.length > 0 ? `
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 class="font-semibold text-lg text-indigo-800 mb-2">Key Feature(s)</h4> <!-- Original text color for accounts -->
+                    ${data.features.map(f => `
+                        <div class="mt-2">
+                             <p class="text-blue-700"><strong class="font-medium">${f.title}:</strong> ${f.text}</p>
+                        </div>
+                    `).join('')}
+                </div>` : ''}
+            `;
+        } else if (type === 'product') {
+            modalContentHTML = `
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">${data.title}</h2> <!-- Changed text color to align with main palette -->
+                <div class="text-gray-800 text-base space-y-4">${data.content}</div>
+            `;
+        }
+
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg shadow-2xl p-8 max-w-3xl w-full relative modal-content border border-gray-100"> <!-- Added border -->
+                <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+                ${modalContentHTML}
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        const modalContent = modal.querySelector('.modal-content');
+        setTimeout(() => {
+            modalContent.classList.add('show');
+        }, 10); // Small delay for transition
+
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'detail-modal' || e.target.id === 'close-modal') {
+                modalContent.classList.remove('show');
+                modalContent.addEventListener('transitionend', () => modal.remove(), { once: true });
+            }
+        });
+        document.getElementById('close-modal').addEventListener('click', () => {
+            modalContent.classList.remove('show');
+            modalContent.addEventListener('transitionend', () => modal.remove(), { once: true });
+        });
+    }
+
+    // --- Tab Switching Logic ---
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+            
+            // Update active/inactive tab styling
+            tabs.forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('tab-inactive');
+            });
+            tab.classList.add('tab-active');
+            tab.classList.remove('tab-inactive');
+
+            // Show/hide content sections
+            contentSections.forEach(section => {
+                if (section.id === target) {
+                    section.classList.add('active');
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+            // Re-render chart if navigating to compare tab
+            if (target === 'compare') {
+                renderComparisonChart('contribution');
+            }
+        });
+    });
+
+    // --- Chart Logic ---
+    let comparisonChart; // Declare chart variable globally to allow destruction
+    function renderComparisonChart(type) {
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        const labels = ['FHSA', 'RRSP', 'TFSA'];
+        let data, chartLabel;
+
+        const contributionData = {
+            label: 'Tax-Deductible?',
+            values: [1, 1, 0], // 1 for Yes, 0 for No
+            backgroundColor: ['#6EE7B7', '#6EE7B7', '#FCA5A5'], /* Softer green for Yes, softer red for No */
+            borderColor: ['#34D399', '#34D399', '#F87171'],
+            yAxisLabel: 'Deductible'
+        };
+
+        const withdrawalData = {
+            label: 'Tax-Free Withdrawal?',
+            values: [1, 0, 1], // 1 for Yes, 0 for No
+            backgroundColor: ['#6EE7B7', '#FCA5A5', '#6EE7B7'],
+            borderColor: ['#34D399', '#F87171', '#34D399'],
+            yAxisLabel: 'Tax-Free'
+        };
+
+        if (type === 'contribution') {
+            data = contributionData;
+            chartLabel = "Are Contributions Tax-Deductible?";
+        } else {
+            data = withdrawalData;
+            chartLabel = "Are Withdrawals Tax-Free?";
+        }
+
+        if (comparisonChart) {
+            comparisonChart.destroy(); // Destroy previous chart instance
+        }
+
+        comparisonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: data.label,
+                    data: data.values,
+                    backgroundColor: data.backgroundColor,
+                    borderColor: data.borderColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: chartLabel,
+                        font: { size: 18, weight: 'bold' },
+                        color: '#374151' /* Darker text for title */
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                return context.raw === 1 ? 'Yes' : 'No';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (value === 1) return 'Yes';
+                                if (value === 0) return 'No';
+                                return '';
+                            },
+                            stepSize: 1,
+                            font: { size: 12 },
+                            color: '#4B5563' /* Grayer ticks */
+                        },
+                         title: {
+                            display: true,
+                            text: data.yAxisLabel,
+                            font: { size: 14, weight: 'bold' },
+                            color: '#4B5563' /* Grayer axis title */
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: { size: 12 },
+                            color: '#4B5563' /* Grayer labels */
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Chart toggle button event listeners
+    chartToggleButtons.forEach(button => {
+        button.addEventListener('click', () => {
+             // Reset styling for all chart toggle buttons
+             chartToggleButtons.forEach(btn => {
+                btn.classList.replace('bg-gray-700', 'bg-gray-400');
+                btn.classList.replace('hover:bg-gray-800', 'hover:bg-gray-500');
+            });
+            // Apply active styling to the clicked button
+            button.classList.replace('bg-gray-400', 'bg-gray-700');
+            button.classList.replace('hover:bg-gray-500', 'hover:bg-gray-800');
+            renderComparisonChart(button.dataset.type);
+        });
+    });
+
+    // --- Glossary Functionality (Gemini API Call) ---
+    explainButton.addEventListener('click', explainTerm);
+    glossaryInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            explainTerm();
+        }
+    });
+
+    async function explainTerm() {
+        const term = glossaryInput.value.trim();
+        if (!term) {
+            glossaryOutput.innerHTML = '<p class="text-center text-red-500">Please enter a term to explain.</p>';
+            return;
+        }
+
+        glossaryOutput.innerHTML = ''; // Clear previous output
+        loadingSpinner.classList.remove('hidden'); // Show spinner
+        explainButton.disabled = true; // Disable button
+
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: `Explain "${term}" in simple terms for a newcomer to Canada. Focus on its relevance to Canadian investing. Keep it concise, around 3-4 sentences.` }] });
+        const payload = { contents: chatHistory };
+        const apiKey = "" // API key is provided by Canvas runtime
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                glossaryOutput.innerHTML = `<p>${text}</p>`;
+            } else {
+                glossaryOutput.innerHTML = '<p class="text-center text-red-500">Sorry, I could not generate an explanation for that term.</p>';
+            }
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            glossaryOutput.innerHTML = '<p class="text-center text-red-500">An error occurred. Please try again later.</p>';
+        } finally {
+            loadingSpinner.classList.add('hidden'); // Hide spinner
+            explainButton.disabled = false; // Enable button
+        }
+    }
+});
+</script>
+
+</body>
+</html>
